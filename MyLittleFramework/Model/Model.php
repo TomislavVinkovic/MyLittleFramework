@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace MyLittleFramework\Model;
 
-include_once(__DIR__ . '/../Traits/AttributeTrait.php');
-include_once(__DIR__ . '/../Traits/TimestampTrait.php');
-require 'vendor/autoload.php';
+require __DIR__ . '/../../vendor/autoload.php';
 
-use App\Traits\AttributeTrait;
-use App\Traits\TimestampTrait;
+use MyLittleFramework\Traits\AttributeTrait;
+use MyLittleFramework\Traits\TimestampTrait;
 use Carbon\Carbon;
 use PDO;
 
@@ -118,7 +116,7 @@ abstract class Model {
 
     public abstract static function createTable($connection);
 
-    public function save($conn) {
+    public function save($conn): int {
         try {
             $keys = $this->getKeys();
             $values = $this->getValues();
@@ -130,9 +128,9 @@ abstract class Model {
                 $values = array_merge(
                     $values,
                     [
-                        $this->created_at,
-                        $this->updated_at,
-                        $this->deleted_at,
+                        $this->timestamps['created_at'],
+                        $this->timestamps['updated_at'],
+                        $this->timestamps['deleted_at'],
                     ]
                 );
             }
@@ -150,12 +148,16 @@ abstract class Model {
             }
 
             $statement->execute($payload);
+
+            $id = $conn->lastInsertId(); //returns the id of the last object inserted
+            return $id;
             
         }catch(Exception $e) {
             var_dump($e->getMessage());
         }
     }
 
+    //update function on a specific model
     public function update($conn) {
         if($this->id === null) {
             echo "Cannot update an object that does not exist in the database";
@@ -188,24 +190,86 @@ abstract class Model {
                 $payload[$key] = $this->attributes[$key];
             }
         }
+
         $statement = $conn->prepare($sql);
         $statement->execute($payload);
     }
 
-    public static function delete($conn, $id) {
+    //static delete functions
+    public static function deleteWithId($conn, $id) {
+        $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $t = static::$table;
+        $car = static::find($conn, $id);
+
+        if($car === null) {
+            echo "The selected car does not exist"; 
+            return;  
+        }
+        $time = Carbon::now()->toDateTimeString();
+        $sql = "UPDATE $t
+                SET deleted_at = $time
+                WHERE id = $id
+                ";
+        $conn->exec($sql);
+    }
+
+    public static function forceDeleteWithId($conn, $id) {
         $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         $t = static::$table;
         $sql = "DELETE FROM $t WHERE id = $id";
         $statement = $conn->prepare($sql);
         $statement->execute();
     }
+    
 
+    //delete function for a model instance
+    public function delete($conn) {
+        if($this->id === null) {
+            echo "Cannot update an object that does not exist in the database";
+            return null;
+        }
+        $id = $this->id;
+        $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $t = static::$table;
+        $car = static::find($conn, $id);
+
+        if($car === null) {
+            echo "The selected car does not exist"; 
+            return;  
+        }
+        $time = Carbon::now()->toDateTimeString();
+        $sql = "UPDATE $t
+                SET deleted_at = '$time'
+                WHERE id = $id
+                ";
+        echo $sql;
+        $conn->exec($sql);
+    }
+
+    public function forceDelete($conn) {
+        if($this->id === null) {
+            echo "Cannot update an object that does not exist in the database";
+            return null;
+        }
+        $id = $this->id;
+        $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $t = static::$table;
+        $sql = "DELETE FROM $t WHERE id = $id";
+        $statement = $conn->prepare($sql);
+        $statement->execute();
+    }
+    //
     public static function all($conn) {
         //This attribute is used to get only a single copy of the data
         //and not both by a numerical id and a string id
         $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         $t = static::$table;
         $sql = "SELECT * FROM $t";
+
+        if(static::$useTimestamps === true) {
+            $sql = self::excludeDeletes($sql);
+        }
+
         $statement = $conn->prepare($sql);
         $statement->execute();
         $data = $statement->fetchAll();
@@ -214,10 +278,13 @@ abstract class Model {
         }
         foreach($data as $obj_arr) {
             $obj = new static();
-            $keys = explode(',', $obj->getKeys());
+            $keys = explode(',', $obj->getKeys(true));
             foreach($keys as $key) {
-                $obj->attributes[$key] = $obj_arr[$key];
+                if(!in_array($key, array_keys($obj->timestamps))) {
+                    $obj->attributes[$key] = $obj_arr[$key];
+                }
             }
+            $obj->setTimeStamps($obj_arr['created_at'], $obj_arr['updated_at'], $obj_arr['deleted_at']);
             $return_data[] = $obj;
         }
         return $return_data;
@@ -232,6 +299,9 @@ abstract class Model {
         $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         $t = static::$table;
         $sql = "SELECT * FROM $t WHERE id = $id";
+        if(static::$useTimestamps === true) {
+            $sql = self::excludeDeletes($sql);
+        }
         $statement = $conn->prepare($sql);
         $statement->execute();
         $data = $statement->fetch();
@@ -259,6 +329,11 @@ abstract class Model {
                 FROM $t 
                 WHERE $propertyName LIKE '$propertyValue'
                 ";
+
+        if(static::$useTimestamps === true) {
+            $sql = self::excludeDeletes($sql);
+        }
+
         $statement = $conn->prepare($sql);
         $statement->execute();
         $data = $statement->fetchAll();

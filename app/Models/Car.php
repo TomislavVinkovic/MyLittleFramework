@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-include_once('Model.php');
+require __DIR__ . '/../../vendor/autoload.php';
 
-use App\Models\Model;
+use MyLittleFramework\Model\Model;
 
 class Car extends Model {
 

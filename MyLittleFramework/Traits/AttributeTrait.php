@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Traits;
+namespace MyLittleFramework\Traits;
+
+require __DIR__ . '/../../vendor/autoload.php';
 
 trait AttributeTrait {
     protected $attributes;

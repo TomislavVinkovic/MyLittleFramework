@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Traits;
+namespace MyLittleFramework\Traits;
+
+require __DIR__ . '/../../vendor/autoload.php';
 
 use PDO;
 use Carbon\Carbon;
@@ -11,6 +13,15 @@ trait TimestampTrait {
         'updated_at' => null,
         'deleted_at' => null
     ];
+
+    protected static function excludeDeletes($sql) {
+        if(str_contains($sql, 'WHERE') || str_contains($sql, 'where')) {
+            return $sql . ' AND deleted_at IS NULL';
+        }
+        else {
+            return $sql . ' WHERE deleted_at IS NULL';
+        }
+    }
 
     protected static function setTimeStampsOnTable($conn, $table) {
         $sql = "ALTER TABLE $table

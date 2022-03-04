@@ -1,6 +1,8 @@
 <?php
 
-namespace App\DB;
+namespace MyLittleFramework\DB;
+
+require __DIR__ . '/../../vendor/autoload.php';
 
 use PDO;
 
@@ -11,11 +13,7 @@ class Connection {
     public function __construct($db) {
         $this->db = $db;
     }
-
-    public function save() {
-
-    }
-
+    
     public function connect() {
         try {
             $pdo = new PDO("sqlite:".$this->db);

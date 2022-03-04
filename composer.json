@@ -1,5 +1,18 @@
 {
     "require": {
         "nesbot/carbon": "^2.57"
+    },
+    "autoload": {
+        "psr-4": {
+            "MyLittleFramework\\Controller\\": "MyLittleFramework/Controller",
+            "MyLittleFramework\\Model\\": "MyLittleFramework/Model",
+            "MyLittleFramework\\DB\\": "MyLittleFramework/DB",
+            "MyLittleFramework\\Router\\": "MyLittleFramework/Router",
+            "MyLittleFramework\\Traits\\": "MyLittleFramework/Traits",
+
+            "App\\": "app/",
+            "App\\Controllers\\": "app/Controllers",
+            "App\\Models\\": "app/Models"
+        }
     }
 }
