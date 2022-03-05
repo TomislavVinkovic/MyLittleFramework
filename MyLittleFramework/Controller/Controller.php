@@ -22,7 +22,7 @@ abstract class Controller {
     }
 
     protected function view($viewName) {
-        echo "To be implemented";
+        throw new Exception('Not implemented yet');
     }
 
     //I will expand this function later with a custom

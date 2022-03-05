@@ -13,15 +13,15 @@ class Request {
         $this->METHOD = $method;
     }
 
-    public function GET() {
+    public function GET(): array {
         return $this->GET;
     }
 
-    public function POST() {
+    public function POST(): array {
         return $this->POST;
     }
 
-    public function METHOD() {
+    public function METHOD(): array {
         return $this->METHOD;
     }
 }

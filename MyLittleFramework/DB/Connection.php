@@ -14,7 +14,7 @@ class Connection {
         $this->db = $db;
     }
     
-    public function connect() {
+    public function connect(): PDO {
         try {
             $pdo = new PDO("sqlite:".$this->db);
             //if I get an error message, i can show it inside the website

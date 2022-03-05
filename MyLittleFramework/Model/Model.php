@@ -17,28 +17,26 @@ abstract class Model {
     protected static $table;
     protected static $useTimestamps;
     
-    public function __get($propertyName) {
+    public function __get($propertyName): mixed {
         return $this->getAttribute($propertyName);
     }
 
         
-    public function __set($propertyName, $propertyValue) {
+    public function __set($propertyName, $propertyValue): void {
         $this->setAttribute($propertyName, $propertyValue);
     }
 
     public function __call($method, $arguments) {
-        $className = get_class($this);
-        echo "No available $method with the given arguments on class $className"; 
+        throw new Exception('Not implemented yet');
     }
 
 
     public function toArray() {
-        //to be implemented
+        throw new Exception('Not implemented yet');
     }
 
     public function __toString() {
-        //to be implemented
-        return "";
+        throw new Exception('Not implemented yet');
     }
 
     public function __sleep() {
@@ -46,13 +44,13 @@ abstract class Model {
     }
 
     public function __wakeup() {
-        echo "To be implemented properly later";
+        throw new Exception('Not implemented yet');
     }
 
 
-    public function __isset($propertyName) {
+    public function __isset($propertyName): bool {
         try {
-            print_r(isset($this->attributes['propertyName']));
+            return (isset($this->attributes['propertyName']));
         }
         catch(Exception $e){
             $className = get_class($this);
@@ -60,18 +58,18 @@ abstract class Model {
         }
     }
 
-    public function __unset($propertyName) {
+    public function __unset($propertyName): void {
         try {
             unset($this->attributes['propertyName']);
         }
         catch(Exception $e){
             $className = get_class($this);
-            echo "No such property $propertyName on class $className";
+            throw new Exception("No such property $propertyName on class $className"); //ovo je dobar primjer gdje mogu implementirati vlastiti exception
         }
         
     }
 
-    private function getKeys($id = false) {
+    private function getKeys($id = false): string {
         $arr_keys = array_keys($this->attributes);
         if(static::$useTimestamps === true) {
             $arr_keys = array_merge($arr_keys, array_keys($this->timestamps));
@@ -85,7 +83,7 @@ abstract class Model {
         return $keys;
     }
 
-    private function getValues() {
+    private function getValues(): array {
         $arr_keys_final = [];
         $arr_keys = array_keys($this->attributes);
         foreach($arr_keys as $key=>$val) { //to get all fields except the id
@@ -100,7 +98,7 @@ abstract class Model {
         return $arr_values;
     }
 
-    private function getSqlValueKeys() {
+    private function getSqlValueKeys(): string {
         $arr_keys = array_keys($this->attributes);
         if(static::$useTimestamps === true) {
             $arr_keys = array_merge($arr_keys, array_keys($this->timestamps));
@@ -151,112 +149,101 @@ abstract class Model {
 
             $id = $conn->lastInsertId(); //returns the id of the last object inserted
             return $id;
-            
         }catch(Exception $e) {
-            var_dump($e->getMessage());
+            throw $e;
         }
     }
 
     //update function on a specific model
-    public function update($conn) {
+    public function update($conn): void {
         if($this->id === null) {
-            echo "Cannot update an object that does not exist in the database";
-            return null;
+            throw new Exception("Cannot update an object that does not exist in the database"); //jos jedno mjesto za neki custom exception
         }
-        $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        $t = static::$table;
-        $keys = explode(',', $this->getKeys(false));
-        $sqlValueKeys = explode(',', $this->getSqlValueKeys());
-        $keyValuePairString = "";
-
-        for($i = 0; $i<count($sqlValueKeys); $i++) {
-            $keyValuePairString = $keyValuePairString . $keys[$i] . ' = ' . $sqlValueKeys[$i] . ',';
-        }
-        $keyValuePairString = substr($keyValuePairString, 0, -1);
-        $id = $this->attributes['id'];
-        $sql = "UPDATE $t
-                SET $keyValuePairString
-                WHERE id = $id
-                ";
-        $payload = [];
-        if(static::$useTimestamps === true) {
-            $this->setTimeStamps(null, Carbon::now()->toDateTimeString(), null);
-        }
-        foreach($keys as $key) {
-            if(in_array($key, array_keys($this->timestamps))) {
-                $payload[$key] = $this->timestamps[$key];
+        try {
+            $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $t = static::$table;
+            $keys = explode(',', $this->getKeys(false));
+            $sqlValueKeys = explode(',', $this->getSqlValueKeys());
+            $keyValuePairString = "";
+    
+            for($i = 0; $i<count($sqlValueKeys); $i++) {
+                $keyValuePairString = $keyValuePairString . $keys[$i] . ' = ' . $sqlValueKeys[$i] . ',';
             }
-            else {
-                $payload[$key] = $this->attributes[$key];
+            $keyValuePairString = substr($keyValuePairString, 0, -1);
+            $id = $this->attributes['id'];
+            $sql = "UPDATE $t
+                    SET $keyValuePairString
+                    WHERE id = $id
+                    ";
+            $payload = [];
+            if(static::$useTimestamps === true) {
+                $this->setTimeStamps(null, Carbon::now()->toDateTimeString(), null);
             }
+            foreach($keys as $key) {
+                if(in_array($key, array_keys($this->timestamps))) {
+                    $payload[$key] = $this->timestamps[$key];
+                }
+                else {
+                    $payload[$key] = $this->attributes[$key];
+                }
+            }
+    
+            $statement = $conn->prepare($sql);
+            $statement->execute($payload);
+        }catch(Exception $e) {
+            throw $e;
         }
+    }
 
-        $statement = $conn->prepare($sql);
-        $statement->execute($payload);
+    private static function softDelete($conn, $id): void {
+        try {
+            $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $t = static::$table;
+            $time = Carbon::now()->toDateTimeString();
+            $sql = "UPDATE $t
+                    SET deleted_at = $time
+                    WHERE id = $id
+                    ";
+            $conn->exec($sql);
+        }catch(Exception $e) {
+            throw $e;
+        }
+    }
+    private function purge($conn, $id) {
+        try {
+            $t = static::$table;
+            $sql = "DELETE FROM $t WHERE id = $id";
+            $statement = $conn->prepare($sql);
+            $statement->execute();
+        }catch(Exception $e){
+            throw $e;
+        }
     }
 
     //static delete functions
     public static function deleteWithId($conn, $id) {
-        $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        $t = static::$table;
-        $car = static::find($conn, $id);
-
-        if($car === null) {
-            echo "The selected car does not exist"; 
-            return;  
-        }
-        $time = Carbon::now()->toDateTimeString();
-        $sql = "UPDATE $t
-                SET deleted_at = $time
-                WHERE id = $id
-                ";
-        $conn->exec($sql);
+        static::softDelete($conn, $id);
     }
 
-    public static function forceDeleteWithId($conn, $id) {
-        $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        $t = static::$table;
-        $sql = "DELETE FROM $t WHERE id = $id";
-        $statement = $conn->prepare($sql);
-        $statement->execute();
+    public static function forceDeleteWithId($conn, $id): void {
+        static::purge($conn, $id);
     }
     
 
     //delete function for a model instance
-    public function delete($conn) {
+    public function delete($conn): void {
         if($this->id === null) {
-            echo "Cannot update an object that does not exist in the database";
-            return null;
+            throw new Exception("Cannot delete an object that does not exist in the database"); //another good place for my custom exception
         }
-        $id = $this->id;
-        $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        $t = static::$table;
-        $car = static::find($conn, $id);
-
-        if($car === null) {
-            echo "The selected car does not exist"; 
-            return;  
-        }
-        $time = Carbon::now()->toDateTimeString();
-        $sql = "UPDATE $t
-                SET deleted_at = '$time'
-                WHERE id = $id
-                ";
-        echo $sql;
-        $conn->exec($sql);
+        self::softDelete($conn, $id);
     }
 
-    public function forceDelete($conn) {
+    public function forceDelete($conn): void {
         if($this->id === null) {
-            echo "Cannot update an object that does not exist in the database";
-            return null;
+            throw new Exception("Cannot delete an object that does not exist in the database"); //another good place for my custom exception
         }
         $id = $this->id;
-        $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        $t = static::$table;
-        $sql = "DELETE FROM $t WHERE id = $id";
-        $statement = $conn->prepare($sql);
-        $statement->execute();
+        static::purge($conn, $id);
     }
     //
     public static function all($conn) {
@@ -340,7 +327,6 @@ abstract class Model {
         if(!$data) {
             return null;
         }
-
         $return_data = [];
         foreach($data as $obj_arr) {
             $obj = new static();

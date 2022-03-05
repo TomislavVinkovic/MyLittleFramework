@@ -12,6 +12,8 @@ class Router {
 
     private const METHOD_GET = 'GET';
     private const METHOD_POST = 'POST';
+    private const METHOD_PATCH = 'PATCH';
+    private const METHOD_DELETE = 'DELETE';
     private $notFoundHandler;
 
     public function get($action, $handler) {
@@ -22,8 +24,12 @@ class Router {
         $this->addHandler(self::METHOD_POST, $action, $handler);
     }
 
-    public function update() {
-        return;
+    public function patch($action, $handler) {
+        $this->addHandler(self::METHOD_PATCH, $action, $handler);
+    }
+
+    public function delete($action, $handler) {
+        $this->addHandler(self::METHOD_DELETE, $action, $handler);
     }
 
     public function setNotFoundHandler($handler) {

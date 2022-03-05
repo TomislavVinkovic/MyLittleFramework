@@ -13,38 +13,31 @@ use PDO;
 
 class CarController extends Controller{
 
+    //GET methods
     public function all() {
-        return Car::all($this->db);
+        var_dump(Car::all($this->db));
     }
 
     public function show(Request $r) {
-        /*
         $id = $r->GET()['id'];
-        return Car::find($this->db, $id);
-        */
+        $car = Car::find($this->db, $id);
 
-        var_dump($r);
-    }
-
-    public function filter(Request $r) { //na ovu metodu moram dodati support za vise argumenata
-
-        /*
-        $name = $r->GET()['name'];
-        $val = $r->GET()['val'];
-        return Car::where($this->db, $name, $val);
-        */
-
-        var_dump($r);
-    }
-
-    public function update(Request $r) {
-        return 'To be implemented';
-    }
-
-    public function new() {
         require_once(__DIR__ . '/../templates/car.php');
     }
 
+    public function filter(Request $r) { //na ovu metodu moram dodati support za vise argumenata
+        throw new Exception('Not implemented yet');
+    }
+
+    public function update(Request $r) {
+        throw new Exception('Not implemented yet');
+    }
+
+    public function new() {
+        require_once(__DIR__ . '/../templates/newCar.php');
+    }
+
+    //POST, PATCH and DELETE methods
     public function store(Request $r) {
         
 
@@ -62,5 +55,13 @@ class CarController extends Controller{
         $id = $car->save($this->db);
         self::redirect("car?id=$id", self::OK); //redirects are not working
         exit();
+    }
+
+    public function patch(Request $r) {
+        var_dump($r);
+    }
+
+    public function delete(Request $r) {
+        var_dump($r);
     }
 }

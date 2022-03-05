@@ -26,12 +26,16 @@ class Routes {
         });
 
         $this->router->get('/car', CarController::class . '::show');
-        $this->router->get('/car/filter', CarController::class . '::filter');
-
+        $this->router->get('/cars', CarController::class . '::all');
+        $this->router->get('/cars/filter', CarController::class . '::filter');
         $this->router->get('/newCar', CarController::class . '::new');
-        $this->router->post('/storeCar', CarController::class . '::store');
+        $this->router->get('/updateCar', CarController::class . '::update');
 
-        //TO BE ADDED: UPDATE, DELETE, FORCEDELETE
+        $this->router->patch('/patchCar', CarController::class, '::patch');
+        $this->router->post('/storeCar', CarController::class . '::store');
+        $this->router->delete('/deleteCar', CarController::class . '::delete');
+
+        //TO BE ADDED: UPDATE, DELETE, FORCEELETE
 
         $this->router->run();
     }
