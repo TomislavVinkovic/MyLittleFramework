@@ -5,18 +5,14 @@ namespace App\Models;
 require __DIR__ . '/../../vendor/autoload.php';
 
 use MyLittleFramework\Model\Model;
+use MyLittleFramework\DB\Connection;
+use Exception;
 
 class Car extends Model {
-
+    
     protected $attributes = [
-        'id' => null,
-        'brand' => null,
-        'model' => null,
-        'color' => null,
-        'car_weight' => null,
-        'top_speed' => null,
-        'chasis_number' => null,
-        'country_of_origin' => null
+        'id', 'brand', 'model','color',
+        'car_weight', 'top_speed', 'chasis_number', 'country_of_origin'
     ];
 
     protected $allowed = [
@@ -25,14 +21,24 @@ class Car extends Model {
     ];
 
     protected static $table = 'cars';
+    protected string $primaryKey = 'id';
     protected static $useTimestamps = true;
 
-    public function __construct() {
-        $this->chasis_number = uniqid("FML");
+    public function __construct($chasis_number = null) {
+
+        parent::__construct(); //do not delete this line
+
+        if($chasis_number === null) {
+            $this->chasis_number = uniqid("FML");
+        }
+        else {
+            $this->chasis_number = $chasis_number;
+        }
     }
 
-    public static function createTable($conn) {
+    public static function createTable(): void {
         try {
+            $conn = Connection::getInstance()->getConnection();
             $conn->exec(
                 'CREATE TABLE cars(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,

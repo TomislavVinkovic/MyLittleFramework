@@ -6,6 +6,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use MyLittleFramework\Router\Router;
 use App\Controllers\CarController;
+use App\Models\Car;
 
 class Routes {
     private Router $router;
@@ -22,7 +23,7 @@ class Routes {
         });
 
         $this->router->get('/', function() {
-            echo 'Home Page';
+            require_once(__DIR__ . '/templates/home.php');
         });
 
         $this->router->get('/car', CarController::class . '::show');
@@ -31,9 +32,11 @@ class Routes {
         $this->router->get('/newCar', CarController::class . '::new');
         $this->router->get('/updateCar', CarController::class . '::update');
 
-        $this->router->patch('/patchCar', CarController::class, '::patch');
+        $this->router->patch('/patchCar', CarController::class . '::patch');
         $this->router->post('/storeCar', CarController::class . '::store');
         $this->router->delete('/deleteCar', CarController::class . '::delete');
+
+        $this->router->get('/404NotFound', $this->router->getNotFoundHandler());
 
         //TO BE ADDED: UPDATE, DELETE, FORCEELETE
 

@@ -6,6 +6,8 @@ require __DIR__ . '/../../vendor/autoload.php';
 
 use PDO;
 use Carbon\Carbon;
+use Exception;
+use Carbon\Exceptions\InvalidFormatException;
 
 trait TimestampTrait {
     protected $timestamps = [
@@ -45,7 +47,7 @@ trait TimestampTrait {
             Carbon::parse($stamp);
             return true;
         }catch(InvalidFormatException $e) {
-            error_log(e->getMessage());
+            error_log($e->getMessage());
             return false;
         }
     }

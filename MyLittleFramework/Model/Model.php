@@ -6,8 +6,12 @@ require __DIR__ . '/../../vendor/autoload.php';
 
 use MyLittleFramework\Traits\AttributeTrait;
 use MyLittleFramework\Traits\TimestampTrait;
+use MyLittleFramework\DB\Connection;
+use MyLittleFramework\Exceptions\NonExistantModelException;
+use MyLittleFramework\Exceptions\UnimplementedMethodException;
+use MyLittleFramework\Exceptions\NonExistantPropertyException;
 use Carbon\Carbon;
-use PDO;
+use Exception;
 
 abstract class Model {
 
@@ -17,66 +21,80 @@ abstract class Model {
     protected static $table;
     protected static $useTimestamps;
     
-    public function __get($propertyName): mixed {
+    public function __construct() {
+        $this->setPrimaryKey(null);
+        foreach($this->attributes as $attr) {
+            if($attr !== $this->primaryKey) {
+                $this->setAttribute($attr, null);
+            }
+        }
+    }
+
+    public function __get(string $propertyName): mixed {
         return $this->getAttribute($propertyName);
     }
 
         
-    public function __set($propertyName, $propertyValue): void {
+    public function __set(string $propertyName, mixed $propertyValue): void {
+        if($propertyName === $this->primaryKey) {
+            $this->setPrimaryKey($propertyValue);
+            return;
+        }
         $this->setAttribute($propertyName, $propertyValue);
     }
 
     public function __call($method, $arguments) {
-        throw new Exception('Not implemented yet');
+        throw new UnimplementedMethodException(__METHOD__);
     }
 
-
-    public function toArray() {
-        throw new Exception('Not implemented yet');
+    public function toArray(): array {
+        throw new UnimplementedMethodException(__METHOD__);
     }
 
-    public function __toString() {
-        throw new Exception('Not implemented yet');
+    public function __toString(): string {
+        throw new UnimplementedMethodException(__METHOD__);
     }
 
     public function __sleep() {
-        return $attributes->array_keys();
+        return $this->attributes;
     }
 
     public function __wakeup() {
-        throw new Exception('Not implemented yet');
+        throw new UnimplementedMethodException(__METHOD__);
     }
 
 
-    public function __isset($propertyName): bool {
+    public function __isset(string $propertyName): bool {
         try {
-            return (isset($this->attributes['propertyName']));
+            return (null !== $this->getAttribute($propertyName));
         }
         catch(Exception $e){
-            $className = get_class($this);
-            echo "No such property $propertyName on class $className";
+            throw $e;
         }
     }
 
-    public function __unset($propertyName): void {
+    public function __unset(string $propertyName): void {
         try {
-            unset($this->attributes['propertyName']);
+            if($propertyName === null) {
+                $this->setPrimaryKey(null);
+                return;
+            }
+            $this->setAttribute($propertyName, null);
         }
-        catch(Exception $e){
-            $className = get_class($this);
-            throw new Exception("No such property $propertyName on class $className"); //ovo je dobar primjer gdje mogu implementirati vlastiti exception
+        catch(Exception $_){
+            throw new NonExistantPropertyException($propertyName, get_class($this));
         }
         
     }
 
-    private function getKeys($id = false): string {
-        $arr_keys = array_keys($this->attributes);
+    private function getKeys(bool $pk = false): string {
+        $arr_keys = $this->attributes;
         if(static::$useTimestamps === true) {
             $arr_keys = array_merge($arr_keys, array_keys($this->timestamps));
         }
         $keys = "";
-        foreach($arr_keys as $key=>$val) { //to get all fields except the id
-            if($key === 0 && $id === false) continue;
+        foreach($arr_keys as $key=>$val) { //to get all fields except the pk
+            if($val === $this->primaryKey && $pk === false) continue;
             $keys = $keys . $val . ',';
         }
         $keys = substr($keys, 0, -1); //micemo zadnji zarez
@@ -85,40 +103,41 @@ abstract class Model {
 
     private function getValues(): array {
         $arr_keys_final = [];
-        $arr_keys = array_keys($this->attributes);
+        $arr_keys = $this->attributes;
         foreach($arr_keys as $key=>$val) { //to get all fields except the id
             if($key === 0) continue;
             $arr_keys_final[] = $val;
         }
         $arr_values = [];
         foreach($arr_keys_final as $key) {
-            $arr_values[] = $this->attributes[$key];
+            $arr_values[] = $this->getAttribute($key);
         }
 
         return $arr_values;
     }
 
     private function getSqlValueKeys(): string {
-        $arr_keys = array_keys($this->attributes);
+        $arr_keys = $this->attributes;
         if(static::$useTimestamps === true) {
             $arr_keys = array_merge($arr_keys, array_keys($this->timestamps));
         }
         $keys = "";
         foreach($arr_keys as $key=>$val) { //to get all fields except the id
-            if($key === 0) continue;
+            if($val == $this->primaryKey) continue;
             $keys = $keys . ':' . $val . ',';
         }
         $keys = substr($keys, 0, -1); //micemo zadnji zarez
         return $keys;
     }
 
-    public abstract static function createTable($connection);
+    public abstract static function createTable();
 
-    public function save($conn): int {
+    public function save(): int {
         try {
+            $conn = Connection::getInstance()->getConnection();
             $keys = $this->getKeys();
-            $values = $this->getValues();
 
+            $values = $this->getValues();
 
             if(static::$useTimestamps === true) {
                 $now = Carbon::now()->toDateTimeString();
@@ -147,20 +166,20 @@ abstract class Model {
 
             $statement->execute($payload);
 
-            $id = $conn->lastInsertId(); //returns the id of the last object inserted
-            return $id;
+            $pk = $conn->lastInsertId(); //returns the id of the last object inserted
+            return $pk;
         }catch(Exception $e) {
             throw $e;
         }
     }
 
     //update function on a specific model
-    public function update($conn): void {
-        if($this->id === null) {
-            throw new Exception("Cannot update an object that does not exist in the database"); //jos jedno mjesto za neki custom exception
+    public function update(): void {
+        if(!$this->getPrimaryKey()) {
+            throw new NonExistantModelException();
         }
         try {
-            $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $conn = Connection::getInstance()->getConnection();
             $t = static::$table;
             $keys = explode(',', $this->getKeys(false));
             $sqlValueKeys = explode(',', $this->getSqlValueKeys());
@@ -170,10 +189,10 @@ abstract class Model {
                 $keyValuePairString = $keyValuePairString . $keys[$i] . ' = ' . $sqlValueKeys[$i] . ',';
             }
             $keyValuePairString = substr($keyValuePairString, 0, -1);
-            $id = $this->attributes['id'];
+            $pk = $this->getPrimaryKey();
             $sql = "UPDATE $t
                     SET $keyValuePairString
-                    WHERE id = $id
+                    WHERE $this->primaryKey = $pk
                     ";
             $payload = [];
             if(static::$useTimestamps === true) {
@@ -184,7 +203,7 @@ abstract class Model {
                     $payload[$key] = $this->timestamps[$key];
                 }
                 else {
-                    $payload[$key] = $this->attributes[$key];
+                    $payload[$key] = $this->getAttribute($key);
                 }
             }
     
@@ -195,24 +214,28 @@ abstract class Model {
         }
     }
 
-    private static function softDelete($conn, $id): void {
+    private static function softDelete(mixed $pk): void {
         try {
-            $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $conn = Connection::getInstance()->getConnection();
+            $obj = new static();
             $t = static::$table;
             $time = Carbon::now()->toDateTimeString();
             $sql = "UPDATE $t
-                    SET deleted_at = $time
-                    WHERE id = $id
+                    SET deleted_at = '$time'
+                    WHERE $obj->primaryKey = $pk
                     ";
             $conn->exec($sql);
         }catch(Exception $e) {
             throw $e;
         }
     }
-    private function purge($conn, $id) {
+    private static function purge(mixed $pk): void {
         try {
+
+            $conn = Connection::getInstance()->getConnection();
+            $obj = new static();
             $t = static::$table;
-            $sql = "DELETE FROM $t WHERE id = $id";
+            $sql = "DELETE FROM $t WHERE $obj->primaryKey = $pk";
             $statement = $conn->prepare($sql);
             $statement->execute();
         }catch(Exception $e){
@@ -221,35 +244,34 @@ abstract class Model {
     }
 
     //static delete functions
-    public static function deleteWithId($conn, $id) {
-        static::softDelete($conn, $id);
+    public static function deleteWithPk(mixed $pk): void {
+        static::softDelete($pk);
     }
 
-    public static function forceDeleteWithId($conn, $id): void {
-        static::purge($conn, $id);
+    public static function forceDeleteWithPk(mixed $pk): void {
+        static::purge($pk);
     }
     
 
     //delete function for a model instance
-    public function delete($conn): void {
-        if($this->id === null) {
-            throw new Exception("Cannot delete an object that does not exist in the database"); //another good place for my custom exception
+    public function delete(): void {
+        if(!$this->getPrimaryKey()) {
+            throw new NonExistantModelException();
         }
-        self::softDelete($conn, $id);
+        self::softDelete($this->getPrimaryKey());
     }
 
-    public function forceDelete($conn): void {
-        if($this->id === null) {
-            throw new Exception("Cannot delete an object that does not exist in the database"); //another good place for my custom exception
+    public function forceDelete(): void {
+        if(!$this->getPrimaryKey()) {
+            throw new NonExistantModelException();
         }
-        $id = $this->id;
-        static::purge($conn, $id);
+        static::purge($this->getPrimaryKey());
     }
     //
-    public static function all($conn) {
+    public static function all(): array {
         //This attribute is used to get only a single copy of the data
         //and not both by a numerical id and a string id
-        $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $conn = Connection::getInstance()->getConnection();
         $t = static::$table;
         $sql = "SELECT * FROM $t";
 
@@ -267,10 +289,11 @@ abstract class Model {
             $obj = new static();
             $keys = explode(',', $obj->getKeys(true));
             foreach($keys as $key) {
-                if(!in_array($key, array_keys($obj->timestamps))) {
-                    $obj->attributes[$key] = $obj_arr[$key];
+                if(!in_array($key, array_keys($obj->timestamps)) && $key !== $obj->primaryKey) {
+                    $obj->setAttribute($key, $obj_arr[$key]);
                 }
             }
+            $obj->setPrimaryKey($obj_arr[$obj->primaryKey]);
             $obj->setTimeStamps($obj_arr['created_at'], $obj_arr['updated_at'], $obj_arr['deleted_at']);
             $return_data[] = $obj;
         }
@@ -282,10 +305,11 @@ abstract class Model {
             late static binding
         */
 
-    public static function find($conn, $id) {
-        $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    public static function find(int $pk): Model {
+        $conn = Connection::getInstance()->getConnection();
         $t = static::$table;
-        $sql = "SELECT * FROM $t WHERE id = $id";
+        $obj = new static();
+        $sql = "SELECT * FROM $t WHERE $obj->primaryKey = $pk";
         if(static::$useTimestamps === true) {
             $sql = self::excludeDeletes($sql);
         }
@@ -300,17 +324,18 @@ abstract class Model {
         $obj = new static();
         $keys = explode(',', $obj->getKeys(true)); //ako na getKeys stavim true vratit ce mi i id
         foreach($keys as $key) {
-            if(!in_array($key, array_keys($obj->timestamps))) {
-                $obj->attributes[$key] = $data[$key];
+            if(!in_array($key, array_keys($obj->timestamps)) && $key !== $obj->primaryKey) {
+                $obj->setAttribute($key, $data[$key]);
             }
         }
+        $obj->setPrimaryKey($data[$obj->primaryKey]);
         $obj->setTimeStamps($data['created_at'], $data['updated_at'], $data['deleted_at']);
         return $obj;
         
     }
 
-    public static function where($conn, $propertyName, $propertyValue) {
-        $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    public static function where(string $propertyName, mixed $propertyValue): array {
+        $conn = Connection::getInstance()->getConnection();
         $t = static::$table;
         $sql = "SELECT * 
                 FROM $t 
@@ -332,7 +357,11 @@ abstract class Model {
             $obj = new static();
             $keys = explode(',', $obj->getKeys());
             foreach($keys as $key) {
-                $obj->attributes[$key] = $obj_arr[$key];
+                if($key !== $obj->primaryKey) {
+                    $obj->setAttribute($key, $obj_arr[$key]);
+                }
+                $obj->setPrimaryKey($obj_arr[$obj->primaryKey]);
+                
             }
             $return_data[] = $obj;
         }

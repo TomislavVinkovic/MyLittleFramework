@@ -9,6 +9,8 @@
             "MyLittleFramework\\DB\\": "MyLittleFramework/DB",
             "MyLittleFramework\\Router\\": "MyLittleFramework/Router",
             "MyLittleFramework\\Traits\\": "MyLittleFramework/Traits",
+            "MyLittleFramework\\Responses\\": "MyLittleFramework/Responses",
+            "MyLittleFramework\\Exceptions\\": "MyLittleFramework/Exceptions",
 
             "App\\": "app/",
             "App\\Controllers\\": "app/Controllers",

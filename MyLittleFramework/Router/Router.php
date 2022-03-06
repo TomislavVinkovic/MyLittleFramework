@@ -12,9 +12,9 @@ class Router {
 
     private const METHOD_GET = 'GET';
     private const METHOD_POST = 'POST';
-    private const METHOD_PATCH = 'PATCH';
-    private const METHOD_DELETE = 'DELETE';
-    private $notFoundHandler;
+    private const METHOD_PATCH = 'POST';
+    private const METHOD_DELETE = 'GET';
+    protected $notFoundHandler;
 
     public function get($action, $handler) {
         $this->addHandler(self::METHOD_GET, $action, $handler);
@@ -34,6 +34,10 @@ class Router {
 
     public function setNotFoundHandler($handler) {
         $this->notFoundHandler = $handler;
+    }
+
+    public function getNotFoundHandler() {
+        return $this->notFoundHandler;
     }
 
     public function run() {
@@ -82,7 +86,6 @@ class Router {
                 };
             }
         }
-
         $request = new Request(
             $method,
             $_GET,
