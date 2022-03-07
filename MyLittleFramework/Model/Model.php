@@ -130,8 +130,6 @@ abstract class Model {
         return $keys;
     }
 
-    public abstract static function createTable();
-
     public function save(): int {
         try {
             $conn = Connection::getInstance()->getConnection();

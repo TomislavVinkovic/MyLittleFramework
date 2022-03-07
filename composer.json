@@ -7,6 +7,7 @@
             "MyLittleFramework\\Controller\\": "MyLittleFramework/Controller",
             "MyLittleFramework\\Model\\": "MyLittleFramework/Model",
             "MyLittleFramework\\DB\\": "MyLittleFramework/DB",
+            "MyLittleFramework\\DB\\Columns\\": "MyLittleFramework/DB/Columns",
             "MyLittleFramework\\Router\\": "MyLittleFramework/Router",
             "MyLittleFramework\\Traits\\": "MyLittleFramework/Traits",
             "MyLittleFramework\\Responses\\": "MyLittleFramework/Responses",
@@ -14,7 +15,9 @@
 
             "App\\": "app/",
             "App\\Controllers\\": "app/Controllers",
-            "App\\Models\\": "app/Models"
+            "App\\Models\\": "app/Models",
+            "App\\Database\\": "app/Database",
+            "App\\Database\\Migrations\\": "app/Database/migrations"
         }
     }
 }

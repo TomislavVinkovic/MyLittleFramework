@@ -36,6 +36,7 @@ class Car extends Model {
         }
     }
 
+    /*
     public static function createTable(): void {
         try {
             $conn = Connection::getInstance()->getConnection();
@@ -56,4 +57,5 @@ class Car extends Model {
             error_log($e->getMessage());
         }
     }
+    */
 }
