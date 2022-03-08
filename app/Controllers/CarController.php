@@ -2,11 +2,9 @@
 
 namespace App\Controllers;
 
-require __DIR__ . '/../../vendor/autoload.php';
-
 use MyLittleFramework\Model\Model;
 use MyLittleFramework\Controller\Controller;
-use MyLittleFramework\Controller\Request;
+use MyLittleFramework\Requests\Request;
 use MyLittleFramework\Responses\Response;
 
 use App\Models\Car;

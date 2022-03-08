@@ -2,8 +2,6 @@
 
 namespace MyLittleFramework\DB\Columns;
 
-require __DIR__ . '/../../../vendor/autoload.php';
-
 class Column {
     protected bool $primaryKey;
     protected bool $increments;
@@ -11,7 +9,6 @@ class Column {
 
     protected string $name;
     protected string $datatype;
-    protected int $length;
 
     public function __construct($name = "", $datatype = "", bool $nullable = true, bool $pk = false, bool $inc = false) {
         $this->name = $name;

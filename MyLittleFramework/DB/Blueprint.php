@@ -2,8 +2,6 @@
 
 namespace MyLittleFramework\DB;
 
-require __DIR__ . '/../../vendor/autoload.php';
-
 use MyLittleFramework\DB\Columns\Column;
 use MyLittleFramework\DB\Columns\VarChar;
 use MyLittleFramework\DB\Columns\ForeignKey;

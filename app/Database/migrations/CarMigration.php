@@ -2,14 +2,14 @@
 
 namespace App\Database\Migrations;
 
-require __DIR__ . '/../../../vendor/autoload.php';
-
 use MyLittleFramework\DB\Migration;
 use MyLittleFramework\DB\Blueprint;
 use MyLittleFramework\DB\Schema;
 
 
 class CarMigration extends Migration {
+
+    protected int $orderNumber = 1;
 
     public function up() {
         Schema::create('cars', function(Blueprint $table){

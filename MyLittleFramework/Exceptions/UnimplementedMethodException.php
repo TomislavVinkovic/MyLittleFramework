@@ -2,8 +2,6 @@
 
 namespace MyLittleFramework\Exceptions;
 
-require __DIR__ . '/../../vendor/autoload.php';
-
 use Exception;
 use Throwable;
 

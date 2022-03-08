@@ -1,6 +1,7 @@
 {
     "require": {
-        "nesbot/carbon": "^2.57"
+        "nesbot/carbon": "^2.57",
+        "haydenpierce/class-finder": "^0.4.3"
     },
     "autoload": {
         "psr-4": {
@@ -11,13 +12,17 @@
             "MyLittleFramework\\Router\\": "MyLittleFramework/Router",
             "MyLittleFramework\\Traits\\": "MyLittleFramework/Traits",
             "MyLittleFramework\\Responses\\": "MyLittleFramework/Responses",
+            "MyLittleFramework\\Requests\\": "MyLittleFramework/Requests",
             "MyLittleFramework\\Exceptions\\": "MyLittleFramework/Exceptions",
 
             "App\\": "app/",
             "App\\Controllers\\": "app/Controllers",
             "App\\Models\\": "app/Models",
             "App\\Database\\": "app/Database",
-            "App\\Database\\Migrations\\": "app/Database/migrations"
+            "App\\Database\\Migrations\\": "app/Database/migrations",
+
+            "Magician\\": "magician/",
+            "Magician\\Traits\\": "magician/Traits"
         }
     }
 }

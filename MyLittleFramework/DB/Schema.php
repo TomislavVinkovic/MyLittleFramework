@@ -2,8 +2,6 @@
 
 namespace MyLittleFramework\DB;
 
-require __DIR__ . '/../../vendor/autoload.php';
-
 use MyLittleFramework\DB\Connection;
 use MyLittleFramework\DB\Blueprint;
 
@@ -59,6 +57,7 @@ class Schema {
             }
             $sql = $sql . ');';
             $conn->exec($sql);
+            //
             
         }catch(Exception $e) {
             throw $e;

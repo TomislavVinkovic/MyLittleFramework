@@ -1,6 +1,6 @@
 <?php
 
-namespace MyLittleFramework\Controller;
+namespace MyLittleFramework\Requests;
 
 class Request {
     private array $GET;

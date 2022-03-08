@@ -2,8 +2,6 @@
 
 namespace MyLittleFramework\Model;
 
-require __DIR__ . '/../../vendor/autoload.php';
-
 use MyLittleFramework\Traits\AttributeTrait;
 use MyLittleFramework\Traits\TimestampTrait;
 use MyLittleFramework\DB\Connection;

@@ -2,8 +2,6 @@
 
 namespace MyLittleFramework\DB\Columns;
 
-require __DIR__ . '/../../../vendor/autoload.php';
-
 use MyLittleFramework\DB\Columns;
 
 class ForeignKey extends Column {

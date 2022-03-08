@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-require __DIR__ . '/../../vendor/autoload.php';
-
 use MyLittleFramework\Model\Model;
 use MyLittleFramework\DB\Connection;
 use Exception;

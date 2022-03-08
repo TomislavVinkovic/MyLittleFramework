@@ -2,9 +2,7 @@
 
 namespace MyLittleFramework\Router;
 
-require __DIR__ . '/../../vendor/autoload.php';
-
-use MyLittleFramework\Controller\Request;
+use MyLittleFramework\Requests\Request;
 
 class Router {
 

@@ -2,8 +2,6 @@
 
 namespace MyLittleFramework\Traits;
 
-require __DIR__ . '/../../vendor/autoload.php';
-
 use Exception;
 
 trait AttributeTrait {

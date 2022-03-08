@@ -2,8 +2,6 @@
 
 namespace MyLittleFramework\Traits;
 
-require __DIR__ . '/../../vendor/autoload.php';
-
 use PDO;
 use Carbon\Carbon;
 use Exception;
@@ -24,7 +22,7 @@ trait TimestampTrait {
             return $sql . ' WHERE deleted_at IS NULL';
         }
     }
-
+    /*
     protected static function setTimeStampsOnTable($conn, $table) {
         $sql = "ALTER TABLE $table
         ADD created_at datetime";
@@ -41,6 +39,7 @@ trait TimestampTrait {
         
         $conn->exec($sql);
     }
+    */
 
     private static function checkStamp($stamp) {
         try {

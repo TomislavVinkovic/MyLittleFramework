@@ -2,8 +2,6 @@
 
 namespace App\Database;
 
-require __DIR__ . '/../../vendor/autoload.php';
-
 use App\Database\Migrations\CarMigration;
 use App\Database\Migrations\EngineMigration;
 
