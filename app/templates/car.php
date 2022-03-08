@@ -37,6 +37,7 @@
         <span><strong>Weight: </strong><?= $car->car_weight ?> kg</span><br />
         <span> <strong>Country of origin: </strong> <?= $car->country_of_origin ?></span><br />
         <span><strong>Top speed: </strong><?= $car->top_speed ?></span><br />
+        <span><strong>Engine:</strong> <?= $car->engine->cubicPower ?> cc, <?= $car->engine->hp ?> hp</span><br />
         
         <a class="updateBtn" href="/updateCar?id=<?=$car->id?>">Update</a>
         <a class="deleteBtn" href="/deleteCar?id=<?=$car->id?>">Delete</a>

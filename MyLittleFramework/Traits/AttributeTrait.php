@@ -10,7 +10,7 @@ trait AttributeTrait {
     protected $attribute_values;
     protected $allowed;
 
-    private function primaryKey_isset(): void {
+    private function primaryKey_isset(): void { //updateati za array keyeva
         if(!$this->primaryKey) {
             $className = get_called_class();
             throw new Exception("The primary key is not set on model $className");

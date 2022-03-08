@@ -20,7 +20,7 @@ class CarController extends Controller{
 
     public function show(Request $r) {
         $id = $r->GET()['id'];
-        $car = Car::find($id);
+        $car = Car::find($id)->with('engine');
         if($car === null) {
             Response::redirect('/404NotFound');
         }
@@ -56,6 +56,7 @@ class CarController extends Controller{
         $data = $r->POST();
 
         $car = new Car();
+        $car->engine_id = 2;
         $car->brand = $data['brand'];
         $car->model = $data['model'];
         $car->color = $data['color'];

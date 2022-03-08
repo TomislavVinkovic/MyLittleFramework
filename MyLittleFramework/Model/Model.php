@@ -4,6 +4,7 @@ namespace MyLittleFramework\Model;
 
 use MyLittleFramework\Traits\AttributeTrait;
 use MyLittleFramework\Traits\TimestampTrait;
+use MyLittleFramework\Traits\RelationsTrait;
 use MyLittleFramework\DB\Connection;
 use MyLittleFramework\Exceptions\NonExistantModelException;
 use MyLittleFramework\Exceptions\UnimplementedMethodException;
@@ -15,15 +16,38 @@ abstract class Model {
 
     use AttributeTrait;
     use TimestampTrait;
+    use RelationsTrait;
 
     protected static $table;
     protected static $useTimestamps;
     
+    protected function initAttributesFromDb() {
+        $t = static::$table;
+        $conn = Connection::getInstance()->getConnection();
+        $sql = "PRAGMA table_info('$t')";
+        $stmt = $conn->prepare($sql);
+        $column_names = [];
+        try {
+            if ($stmt->execute()){
+                $raw_column_data = $stmt->fetchAll();
+                foreach($raw_column_data as $col) {
+                    if(!in_array($col['name'], array_keys($this->timestamps))) {
+                        $this->attributes[] = $col['name'];
+                    }
+                    
+                }
+            }
+        }catch (Exception $e) {
+            throw $e;
+        }
+    } //dodati support za jos primary keyeva
+
     public function __construct() {
+        $this->initAttributesFromDb();
         $this->setPrimaryKey(null);
         foreach($this->attributes as $attr) {
             if($attr !== $this->primaryKey) {
-                $this->setAttribute($attr, null);
+                $this->attribute_values[$attr] = null;
             }
         }
     }
@@ -38,7 +62,12 @@ abstract class Model {
             $this->setPrimaryKey($propertyValue);
             return;
         }
-        $this->setAttribute($propertyName, $propertyValue);
+        else if(in_array($propertyName, $this->attributes)) {
+            $this->setAttribute($propertyName, $propertyValue);
+        }
+        else {
+            $this->$propertyName = $propertyValue;
+        }
     }
 
     public function __call($method, $arguments) {
@@ -83,6 +112,10 @@ abstract class Model {
             throw new NonExistantPropertyException($propertyName, get_class($this));
         }
         
+    }
+
+    public function getTable() {
+        return static::$table;
     }
 
     private function getKeys(bool $pk = false): string {

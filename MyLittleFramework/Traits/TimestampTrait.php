@@ -22,24 +22,6 @@ trait TimestampTrait {
             return $sql . ' WHERE deleted_at IS NULL';
         }
     }
-    /*
-    protected static function setTimeStampsOnTable($conn, $table) {
-        $sql = "ALTER TABLE $table
-        ADD created_at datetime";
-
-        $conn->exec($sql);
-
-        $sql = "ALTER TABLE $table
-        ADD updated_at datetime";
-        
-        $conn->exec($sql);
-
-        $sql = "ALTER TABLE $table
-        ADD deleted_at datetime";
-        
-        $conn->exec($sql);
-    }
-    */
 
     private static function checkStamp($stamp) {
         try {

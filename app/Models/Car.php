@@ -3,18 +3,13 @@
 namespace App\Models;
 
 use MyLittleFramework\Model\Model;
-use MyLittleFramework\DB\Connection;
+use App\Models\Engine;
 use Exception;
 
 class Car extends Model {
-    
-    protected $attributes = [
-        'id', 'brand', 'model','color',
-        'car_weight', 'top_speed', 'chasis_number', 'country_of_origin'
-    ];
 
     protected $allowed = [
-        'brand', 'model', 'color', 'car_weight', 
+        'engine_id','brand', 'model', 'color', 'car_weight', 
         'chasis_number', 'top_speed', 'country_of_origin'
     ];
 
@@ -34,26 +29,8 @@ class Car extends Model {
         }
     }
 
-    /*
-    public static function createTable(): void {
-        try {
-            $conn = Connection::getInstance()->getConnection();
-            $conn->exec(
-                'CREATE TABLE cars(
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    brand VARCHAR(100),
-                    model VARCHAR(150),
-                    color VARCHAR(100) NULL,
-                    car_weight FLOAT NULL,
-                    top_speed BIGINT NULL,
-                    chasis_number VARCHAR(150),
-                    country_of_origin VARCHAR(100)
-                );'
-            );
-            self::setTimeStampsOnTable($conn, self::$table);
-        }catch(Exception $e) {
-            error_log($e->getMessage());
-        }
+    public function engine() {
+        $engine = $this->hasOne('engine_id', 'id', Engine::class);
+        return $engine;
     }
-    */
 }

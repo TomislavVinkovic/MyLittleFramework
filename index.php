@@ -2,8 +2,7 @@
 
     require 'vendor/autoload.php';
     use App\Routes;
-    use App\Database\Migrate;
-    $routes = new Routes();
+    use App\Models\Car;
 
-    //Migrate::up();
+    $routes = new Routes();
 ?>
