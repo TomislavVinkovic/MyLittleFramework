@@ -297,7 +297,7 @@ abstract class Model {
         static::purge($this->getPrimaryKey());
     }
     //
-    public static function all(): array {
+    public static function all(): ?array {
         //This attribute is used to get only a single copy of the data
         //and not both by a numerical id and a string id
         $conn = Connection::getInstance()->getConnection();
@@ -334,7 +334,7 @@ abstract class Model {
             late static binding
         */
 
-    public static function find(int $pk): Model {
+    public static function find(int $pk): ?Model {
         $conn = Connection::getInstance()->getConnection();
         $t = static::$table;
         $obj = new static();

@@ -1,7 +1,8 @@
 {
     "require": {
         "nesbot/carbon": "^2.57",
-        "haydenpierce/class-finder": "^0.4.3"
+        "haydenpierce/class-finder": "^0.4.3",
+        "twig/twig": "^3.3"
     },
     "autoload": {
         "psr-4": {
@@ -14,6 +15,7 @@
             "MyLittleFramework\\Responses\\": "MyLittleFramework/Responses",
             "MyLittleFramework\\Requests\\": "MyLittleFramework/Requests",
             "MyLittleFramework\\Exceptions\\": "MyLittleFramework/Exceptions",
+            "MyLittleFramework\\Views\\": "MyLittleFramework/Views",
 
             "App\\": "app/",
             "App\\Controllers\\": "app/Controllers",

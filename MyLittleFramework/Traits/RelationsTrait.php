@@ -3,6 +3,7 @@
 namespace MyLittleFramework\Traits;
 
 use MyLittleFramework\DB\Connection;
+use Exception;
 use Carbon\Carbon;
 
 trait RelationsTrait {
@@ -37,6 +38,9 @@ trait RelationsTrait {
     //za pokazni primjer radit ce samo za hasOne relationship, i za samo jedan objekt
     public function with(string $localMethod): ?object {
         try {
+            if($this === null) {
+                return null;
+            }
             $callback = [$this, $localMethod];
             $result = call_user_func($callback);
             $this->$localMethod = $result;

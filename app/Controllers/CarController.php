@@ -13,20 +13,25 @@ use Exception;
 
 class CarController extends Controller{
 
-    //GET methods
+    
+    protected $notFoundPage = '404NotFound.html.twig';
+
     public function all() {
         var_dump(Car::all());
     }
 
     public function show(Request $r) {
         $id = $r->GET()['id'];
-        $car = Car::find($id)->with('engine');
-        if($car === null) {
-            Response::redirect('/404NotFound');
+        $car = Car::find($id)?->with('engine');
+        if(!$car) {
+            $this->notFound();
         }
-        else {
-            require_once(__DIR__ . '/../templates/car.php');
-        }
+        $this->render(
+            'car',
+            [
+                'car' => $car
+            ]
+        );            
     }
 
     public function filter(Request $r) { //na ovu metodu moram dodati support za vise argumenata
@@ -35,13 +40,22 @@ class CarController extends Controller{
 
     public function update(Request $r) {
         $id = $r->get()['id'];
+        if(!$id) {
+            $this->notFound();
+        }
+
         $car = Car::find($id);
 
-        if($car === null) {
-            require_once(__DIR__ . '/../templates/404NotFound.php');
+        if(!$car) {
+            $this->notFound();
         }
         else {
-            require_once(__DIR__ . '/../templates/updateCar.php');
+            $this->render(
+                'updateCar',
+                [
+                    'car' => $car
+                ]
+            );
         }
     }
 

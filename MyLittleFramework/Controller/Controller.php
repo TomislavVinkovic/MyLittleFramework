@@ -2,9 +2,8 @@
 
 namespace MyLittleFramework\Controller;
 
-use MyLittleFramework\DB\Connection;
-use Exception;
+use MyLittleFramework\Views\ViewTrait;
 
 abstract class Controller {
-    //this class will be used for something, i swear :D
+    use ViewTrait;
 }
