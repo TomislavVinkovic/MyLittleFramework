@@ -14,6 +14,10 @@ trait TimestampTrait {
         'deleted_at' => null
     ];
 
+    public function getTimestamps() {
+        return $this->timestamps;
+    }
+
     protected static function excludeDeletes($sql) {
         if(str_contains($sql, 'WHERE') || str_contains($sql, 'where')) {
             return $sql . ' AND deleted_at IS NULL';
@@ -33,7 +37,7 @@ trait TimestampTrait {
         }
     }
 
-    protected function setTimeStamps($created_at = null, $updated_at = null, $deleted_at = null) {
+    public function setTimeStamps($created_at = null, $updated_at = null, $deleted_at = null) {
         try {
             if($created_at !== null && self::checkStamp($created_at)) {
                 $this->timestamps['created_at'] = $created_at;

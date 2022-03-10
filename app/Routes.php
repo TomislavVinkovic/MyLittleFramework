@@ -6,25 +6,21 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use MyLittleFramework\Router\Router;
 use App\Controllers\CarController;
+use App\Controllers\HomeController;
+use MyLittleFramework\Views\ViewTrait;
 use App\Models\Car;
 
 class Routes {
     private Router $router;
 
+    use ViewTrait;
+
     public function __construct() {
         $this->router = new Router;
         
         //define your routes down below:
-        
-        $this->router->setNotFoundHandler(function() {
-            //this view handling is just for demonstration purposes
-            $title = "Not found!"; //an example variable that we can pass
-            require_once(__DIR__ . '/templates/404NotFound.php');
-        });
 
-        $this->router->get('/', function() {
-            require_once(__DIR__ . '/templates/home.php');
-        });
+        $this->router->get('/', HomeController::class . '::index');
 
         $this->router->get('/car', CarController::class . '::show');
         $this->router->get('/cars', CarController::class . '::all');
@@ -37,8 +33,6 @@ class Routes {
         $this->router->delete('/deleteCar', CarController::class . '::delete');
 
         $this->router->get('/404NotFound', $this->router->getNotFoundHandler());
-
-        //TO BE ADDED: UPDATE, DELETE, FORCEELETE
 
         $this->router->run();
     }

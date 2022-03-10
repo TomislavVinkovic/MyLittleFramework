@@ -26,6 +26,10 @@ trait AttributeTrait {
         }
     }
 
+    public function getPrimaryKeyName(): mixed {
+        return $this->primaryKey;
+    } 
+
     public function getPrimaryKey(): mixed {
         return $this->attribute_values[$this->primaryKey];
     } 
@@ -39,7 +43,7 @@ trait AttributeTrait {
         return $this->attribute_values[$propertyName];
     }
 
-    protected function setAttribute(string $propertyName, mixed $propertyValue): void {
+    public function setAttribute(string $propertyName, mixed $propertyValue): void {
 
         if (!in_array($propertyName, $this->attributes)) {
             $class = get_called_class();

@@ -11,6 +11,7 @@ use MyLittleFramework\Exceptions\UnimplementedMethodException;
 use MyLittleFramework\Exceptions\NonExistantPropertyException;
 use Carbon\Carbon;
 use Exception;
+use MyLittleFramework\Query\Query;
 
 abstract class Model {
 
@@ -118,7 +119,11 @@ abstract class Model {
         return static::$table;
     }
 
-    private function getKeys(bool $pk = false): string {
+    public static function getClassTable() {
+        return static::$table;
+    }
+
+    public function getKeys(bool $pk = false): string {
         $arr_keys = $this->attributes;
         if(static::$useTimestamps === true) {
             $arr_keys = array_merge($arr_keys, array_keys($this->timestamps));
@@ -132,7 +137,7 @@ abstract class Model {
         return $keys;
     }
 
-    private function getValues(): array {
+    public function getValues(): array {
         $arr_keys_final = [];
         $arr_keys = $this->attributes;
         foreach($arr_keys as $key=>$val) { //to get all fields except the id
@@ -147,7 +152,7 @@ abstract class Model {
         return $arr_values;
     }
 
-    private function getSqlValueKeys(): string {
+    public function getSqlValueKeys(): string {
         $arr_keys = $this->attributes;
         if(static::$useTimestamps === true) {
             $arr_keys = array_merge($arr_keys, array_keys($this->timestamps));
@@ -363,39 +368,9 @@ abstract class Model {
         
     }
 
-    public static function where(string $propertyName, mixed $propertyValue): array {
-        $conn = Connection::getInstance()->getConnection();
-        $t = static::$table;
-        $sql = "SELECT * 
-                FROM $t 
-                WHERE $propertyName LIKE '$propertyValue'
-                ";
-
-        if(static::$useTimestamps === true) {
-            $sql = self::excludeDeletes($sql);
-        }
-
-        $statement = $conn->prepare($sql);
-        $statement->execute();
-        $data = $statement->fetchAll();
-        if(!$data) {
-            return null;
-        }
-        $return_data = [];
-        foreach($data as $obj_arr) {
-            $obj = new static();
-            $keys = explode(',', $obj->getKeys());
-            foreach($keys as $key) {
-                if($key !== $obj->primaryKey) {
-                    $obj->setAttribute($key, $obj_arr[$key]);
-                }
-                $obj->setPrimaryKey($obj_arr[$obj->primaryKey]);
-                
-            }
-            $return_data[] = $obj;
-        }
-
-        return $return_data;
+    public static function where(string $propertyName, string $operator, mixed $propertyValue): Query {
+        $q = new Query(static::class);
+        return $q->where($propertyName, $operator, $propertyValue);
     }
 
 }

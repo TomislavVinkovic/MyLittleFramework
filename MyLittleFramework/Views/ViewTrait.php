@@ -2,7 +2,6 @@
 
 namespace MyLittleFramework\Views;
 
-
 use MyLittleFramework\Views\ViewService;
 
 trait ViewTrait {
@@ -13,7 +12,7 @@ trait ViewTrait {
         $this->viewManager = ViewService::getInstance()->getTwigInstance();
     }
 
-    protected function render(string $template, array $args) {
+    protected function render(string $template, array $args = []) {
         if(str_contains($template, 'html.twig')) {
             echo $this->viewManager->render($template, $args);
         }

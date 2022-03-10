@@ -16,6 +16,7 @@
             "MyLittleFramework\\Requests\\": "MyLittleFramework/Requests",
             "MyLittleFramework\\Exceptions\\": "MyLittleFramework/Exceptions",
             "MyLittleFramework\\Views\\": "MyLittleFramework/Views",
+            "MyLittleFramework\\Query\\": "MyLittleFramework/Query",
 
             "App\\": "app/",
             "App\\Controllers\\": "app/Controllers",

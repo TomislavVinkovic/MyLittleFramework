@@ -6,18 +6,22 @@ use MyLittleFramework\Model\Model;
 use MyLittleFramework\Controller\Controller;
 use MyLittleFramework\Requests\Request;
 use MyLittleFramework\Responses\Response;
+use MyLittleFramework\Query\Query;
 
 use App\Models\Car;
-use PDO;
 use Exception;
 
 class CarController extends Controller{
-
-    
     protected $notFoundPage = '404NotFound.html.twig';
 
     public function all() {
-        var_dump(Car::all());
+        $cars = Car::all();
+        $this->render(
+            'cars',
+            [
+                'cars' => $cars
+            ]
+        );
     }
 
     public function show(Request $r) {
@@ -34,8 +38,27 @@ class CarController extends Controller{
         );            
     }
 
-    public function filter(Request $r) { //na ovu metodu moram dodati support za vise argumenata
-        throw new Exception('Not implemented yet');
+    public function filter(Request $r) {
+        $filters = $r->GET();
+
+        //napravio sam sve sa LIKE operatorom radi jednostavnosti. Svjestan sam da bi se npr, u API callu, u post requestu lako mogao dodati operator
+        //na kraju krajeva, kad bi netko koristio moj framework, on bi mogao napraviti isto :)
+        //$cars = Car::where('brand', 'LIKE', 'VW')?->orWhere('color', 'like', 'black')?->get(); //radi i ovakav neki primjer
+
+        $q = new Query(Car::class);
+        
+        foreach($filters as $key=>$value) {
+            $q->where($key, 'LIKE', $value); //ako postoji vise od jednog where querya, query automatski izmedu svakog stavlja and operator
+        }
+
+        $cars = $q->get();
+
+        $this->render(
+            'cars',
+             [
+                 'cars' => $cars
+             ]
+        );
     }
 
     public function update(Request $r) {
@@ -60,7 +83,7 @@ class CarController extends Controller{
     }
 
     public function new() {
-        require_once(__DIR__ . '/../templates/newCar.php');
+        $this->render('newCar');
     }
 
     //POST, PATCH and DELETE methods
