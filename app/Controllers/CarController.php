@@ -103,7 +103,7 @@ class CarController extends Controller{
         
 
         $id = $car->save();
-        Response::redirect("car?id=$id"); //redirects are not working
+        Response::redirect("car?id=$id");
         exit();
     }
 
@@ -113,13 +113,7 @@ class CarController extends Controller{
                 Response::redirect('/404NotFound');
             }
             $data = $r->post();
-            /*
-            $car = Car::find($data['id']);
             
-            if($car === null) {
-                Response::redirect('/404NotFound');
-            }
-            */
             $id = $data['id'];
             $car = new Car();
             $car->setPrimaryKey($id);

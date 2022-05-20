@@ -1,6 +1,10 @@
-# Factory Praksa Zadatak
+# MyLittleFramework
 
-## The magician
+A simple project that I had to do during my time as an intern at factory.
+The framework has bugs and it is laregly unfinished (because of the last few features, the app is not working correctly).
+However, it is a cool little project and I will probably pick it up again sometime later.
+
+## The magician, a helpful command line tool
 With the help of the <b>magician</b> and its mystical powers, we can do a bunch of cool stuff!<br /><br />
 
 To migrate all migrations to the database, type `php magician.php migrate` in the console. It will truly migrate EVERYTHING. Currently it does not track migrations.<br />

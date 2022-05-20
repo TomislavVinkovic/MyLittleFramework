@@ -1,0 +1,16 @@
+koristiti composer autoload +
+ubaciti rute u posebnu klasu +
+prouciti htaccess +
+izbaciti echo +
+Sloziti request objekt +
+Dodati delete i update na router +
+Ubaciti typehintanje, za parametre i funkcije +
+ubaciti support za razlicite tipove operatora i vise parametara u where (hint: array supportanih operatora)
+Pogledati sta je singleton. Napraviti Connection objekt preko singletonea +
+implementirati sve magicne metode u model klasi
+implementirati neki svoj exception
+
+pitati dinu za warning oko pass by refference kod blueprint klase
+FIXATI ATRIBUTE DO KRAJA
+
+glpat-qH9Aqpbc_UvKAaxH96Yr

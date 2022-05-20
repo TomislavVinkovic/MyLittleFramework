@@ -91,7 +91,7 @@ class Query {
 
     private function excludeSoftDeletes() {
         if($this->sql === "SELECT * FROM $this->table WHERE") {
-            throw new Exception("Unfinished sql statement inside a query");
+            $this->sql = $this->sql . " deleted_at IS NULL";
         }
         else {
             $this->sql = $this->sql . " AND deleted_at IS NULL";
@@ -99,7 +99,10 @@ class Query {
     }
 
     public function get(bool $excludeSoftDeletes = true) {
-        $this->excludeSoftDeletes();
+        if($excludeSoftDeletes) {
+            $this->excludeSoftDeletes();
+        }
+        
         $statement = $this->conn->prepare($this->sql);
         $statement->execute();
         $data = $statement->fetchAll();
