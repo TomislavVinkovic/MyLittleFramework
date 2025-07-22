@@ -1,8 +1,8 @@
 # MyLittleFramework
 
-A simple project that I had to do during my time as an intern at factory.
+A simple project that I had to do during my time as an intern at Factory.
 The framework has bugs and it is laregly unfinished (because of the last few features, the app is not working correctly).
-However, it is a cool little project and I will probably pick it up again sometime later.
+However, it is a cool little project to showcase various PHP features.
 
 ## The magician, a helpful command line tool
 With the help of the <b>magician</b> and its mystical powers, we can do a bunch of cool stuff!<br /><br />
